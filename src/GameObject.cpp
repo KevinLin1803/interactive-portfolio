@@ -49,3 +49,9 @@ void Person::updateSprite() {
 void Person::draw(int camX, int camY) const {
     sprite_.draw(x_, y_, camX, camY);
 }
+
+void Person::warpTo(int x, int y) {
+    x_ = x;
+    y_ = y;
+    movingProgress_ = 0;
+}

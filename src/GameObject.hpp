@@ -16,6 +16,10 @@ public:
     void update(DirectionInput& input, const GameMap& map);
     void draw(int camX, int camY) const;
 
+    // Instantly relocates the person (e.g. a map transition), bypassing the
+    // grid-locked walk animation.
+    void warpTo(int x, int y);
+
     int x() const { return x_; }
     int y() const { return y_; }
 

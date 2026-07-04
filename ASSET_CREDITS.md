@@ -8,6 +8,7 @@ All art currently in `assets/` is **procedurally generated** by
 present so the engine has something to render and verify.
 
 - `assets/maps/demo_lower.png`, `demo_upper.png` - generated demo map
+- `assets/maps/hub_lower.png`, `hub_upper.png` - generated portfolio hub room
 - `assets/characters/hero.png` - generated 4-direction walk sheet
 - `assets/characters/npc.png` - generated 4-direction walk sheet, NPC palette
 - `assets/characters/shadow.png` - generated shadow

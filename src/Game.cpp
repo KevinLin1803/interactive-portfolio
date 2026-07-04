@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "DemoMap.hpp"
+#include "HubMap.hpp"
 #include <cmath>
 #include <cstdlib> // std::abs for the NPC-adjacency check
 
@@ -20,16 +21,29 @@ Game::Game(std::string screenshotPath, int screenshotFrames)
 
     const Texture2D lower = assets_.load("assets/maps/demo_lower.png");
     const Texture2D upper = assets_.load("assets/maps/demo_upper.png");
-    map_ = std::make_unique<GameMap>(lower, upper);
+    demoMap_ = std::make_unique<GameMap>(lower, upper);
 
-    // Build collisions from the shared, deterministic map definition.
+    // Build collisions from the shared, deterministic map definitions.
     for (int gy = 0; gy < demomap::H; ++gy) {
         for (int gx = 0; gx < demomap::W; ++gx) {
             if (demomap::isWall(demomap::tileAt(gx, gy))) {
-                map_->addWall(gx, gy);
+                demoMap_->addWall(gx, gy);
             }
         }
     }
+
+    const Texture2D hubLower = assets_.load("assets/maps/hub_lower.png");
+    const Texture2D hubUpper = assets_.load("assets/maps/hub_upper.png");
+    hubMap_ = std::make_unique<GameMap>(hubLower, hubUpper);
+    for (int gy = 0; gy < hubmap::H; ++gy) {
+        for (int gx = 0; gx < hubmap::W; ++gx) {
+            if (hubmap::isWall(hubmap::tileAt(gx, gy))) {
+                hubMap_->addWall(gx, gy);
+            }
+        }
+    }
+
+    activeMap_ = demoMap_.get();
 
     const Texture2D hero = assets_.load("assets/characters/hero.png");
     const Texture2D shadow = assets_.load("assets/characters/shadow.png");
@@ -55,12 +69,19 @@ bool isAdjacent(const Person& a, const Person& b) {
     const int dy = std::abs(a.y() - b.y());
     return (dx == grid::TILE && dy == 0) || (dx == 0 && dy == grid::TILE);
 }
+
+// True when the person is standing exactly on grid cell (gx, gy), in pixels.
+bool atTile(const Person& p, int gx, int gy) {
+    return p.x() == gx * grid::TILE && p.y() == gy * grid::TILE;
+}
 } // namespace
 
 void Game::frame() {
     // --- update ---
     input_.update();
-    npc_->update(input_, *map_);
+    if (currentMap_ == MapId::Demo) {
+        npc_->update(input_, *activeMap_);
+    }
     if (menu_.isOpen()) {
         // Pause menu is up: freeze the world and just navigate the list.
         if (IsKeyPressed(KEY_DOWN)) menu_.moveDown();
@@ -81,9 +102,21 @@ void Game::frame() {
             message_.confirm();
         }
     } else {
-        player_->update(input_, *map_);
-        if (IsKeyPressed(KEY_SPACE) && isAdjacent(*player_, *npc_)) {
-            message_.show("Hi! Welcome to my portfolio.");
+        player_->update(input_, *activeMap_);
+        if (currentMap_ == MapId::Demo) {
+            if (IsKeyPressed(KEY_SPACE) && isAdjacent(*player_, *npc_)) {
+                message_.show("Hi! Welcome to my portfolio.");
+            }
+            if (atTile(*player_, demomap::DOOR_X, demomap::DOOR_Y)) {
+                currentMap_ = MapId::Hub;
+                activeMap_ = hubMap_.get();
+                player_->warpTo(hubmap::SPAWN_X, hubmap::SPAWN_Y);
+                message_.show("Welcome to the Hub! This is where my projects, work, and skills will live.");
+            }
+        } else if (atTile(*player_, hubmap::W / 2, hubmap::H - 1)) {
+            currentMap_ = MapId::Demo;
+            activeMap_ = demoMap_.get();
+            player_->warpTo(demomap::DOOR_RETURN_X, demomap::DOOR_RETURN_Y);
         }
         if (IsKeyPressed(KEY_ESCAPE)) {
             menu_.open({"Resume", "Quit"});
@@ -95,10 +128,12 @@ void Game::frame() {
     // --- draw world at native 352x198 ---
     BeginTextureMode(target_);
     ClearBackground(Color{40, 50, 40, 255});
-    map_->drawLower(camX, camY);
+    activeMap_->drawLower(camX, camY);
     player_->draw(camX, camY);
-    npc_->draw(camX, camY);
-    map_->drawUpper(camX, camY);
+    if (currentMap_ == MapId::Demo) {
+        npc_->draw(camX, camY);
+    }
+    activeMap_->drawUpper(camX, camY);
     message_.draw();
     menu_.draw();
     EndTextureMode();

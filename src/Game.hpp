@@ -23,9 +23,14 @@ public:
     bool shouldQuit() const { return quit_; }
 
 private:
+    enum class MapId { Demo, Hub };
+
     RenderTexture2D target_{};
     AssetStore assets_;
-    std::unique_ptr<GameMap> map_;
+    std::unique_ptr<GameMap> demoMap_;
+    std::unique_ptr<GameMap> hubMap_;
+    GameMap* activeMap_ = nullptr;
+    MapId currentMap_ = MapId::Demo;
     std::unique_ptr<Person> player_;
     std::unique_ptr<Person> npc_;
     DirectionInput input_;

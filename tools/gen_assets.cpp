@@ -5,6 +5,7 @@
 // Uses only raylib's CPU-side Image API, so it runs headless (no GL context).
 #include "DemoMap.hpp"
 #include "Grid.hpp"
+#include "HubMap.hpp"
 #include "raylib.h"
 #include <filesystem>
 
@@ -22,6 +23,11 @@ const Color CANOPY_D{32, 88, 52, 255};
 const Color TRUNK{120, 80, 48, 255};
 const Color FLOWER_R{224, 96, 96, 255};
 const Color FLOWER_Y{240, 216, 96, 255};
+const Color DOOR_FRAME{120, 72, 40, 255};
+const Color FLOOR_A{200, 176, 144, 255};
+const Color FLOOR_B{184, 160, 128, 255};
+const Color WALL_COLOR{96, 80, 64, 255};
+const Color EXIT_COLOR{216, 192, 128, 255};
 
 void drawGrass(Image* img, int ox, int oy) {
     ImageDrawRectangle(img, ox, oy, T, T, GRASS_A);
@@ -54,6 +60,26 @@ void drawTileLower(Image* img, int gx, int gy) {
         case demomap::TREE:
             drawGrass(img, ox, oy);
             ImageDrawRectangle(img, ox + 6, oy + 9, 4, 6, TRUNK);
+            break;
+        case demomap::DOOR:
+            ImageDrawRectangle(img, ox, oy, T, T, PATH_A);
+            ImageDrawRectangle(img, ox + 3, oy + 2, T - 6, T - 4, DOOR_FRAME);
+            break;
+    }
+}
+
+// Hub room: plain checkered floor, solid walls, and a distinct exit tile.
+void drawHubTile(Image* img, int gx, int gy) {
+    const int ox = gx * T, oy = gy * T;
+    switch (hubmap::tileAt(gx, gy)) {
+        case hubmap::WALL:
+            ImageDrawRectangle(img, ox, oy, T, T, WALL_COLOR);
+            break;
+        case hubmap::EXIT:
+            ImageDrawRectangle(img, ox, oy, T, T, EXIT_COLOR);
+            break;
+        case hubmap::FLOOR:
+            ImageDrawRectangle(img, ox, oy, T, T, (gx + gy) % 2 == 0 ? FLOOR_A : FLOOR_B);
             break;
     }
 }
@@ -130,6 +156,17 @@ int main() {
         for (int gx = 0; gx < demomap::W; ++gx) drawTileUpper(&upper, gx, gy);
     ExportImage(upper, "assets/maps/demo_upper.png");
     UnloadImage(upper);
+
+    // --- hub room: plain floor/walls, no upper-layer content ---
+    Image hubLower = GenImageColor(hubmap::W * T, hubmap::H * T, FLOOR_A);
+    for (int gy = 0; gy < hubmap::H; ++gy)
+        for (int gx = 0; gx < hubmap::W; ++gx) drawHubTile(&hubLower, gx, gy);
+    ExportImage(hubLower, "assets/maps/hub_lower.png");
+    UnloadImage(hubLower);
+
+    Image hubUpper = GenImageColor(hubmap::W * T, hubmap::H * T, BLANK);
+    ExportImage(hubUpper, "assets/maps/hub_upper.png");
+    UnloadImage(hubUpper);
 
     // --- character sheets: 4 cols (frames) x 4 rows (directions) of 32px ---
     const grid::Dir dirs[4] = {grid::Dir::Down, grid::Dir::Right, grid::Dir::Up,
