@@ -21,6 +21,10 @@ constexpr int GRASS_SHEET_COL = 5;
 constexpr int GRASS_SHEET_ROW = 0;
 constexpr int PATH_SHEET_COL = 6;
 constexpr int PATH_SHEET_ROW = 0;
+constexpr int HUB_FLOOR_A_SHEET_COL = 21;
+constexpr int HUB_FLOOR_A_SHEET_ROW = 17;
+constexpr int HUB_FLOOR_B_SHEET_COL = 26;
+constexpr int HUB_FLOOR_B_SHEET_ROW = 18;
 
 void blitSheetTile(Image* dst, Image* sheet, int sheetCol, int sheetRow, int ox, int oy) {
     Rectangle src{float(sheetCol * SHEET_CELL), float(sheetRow * SHEET_CELL), float(T), float(T)};
@@ -37,8 +41,6 @@ const Color TRUNK{120, 80, 48, 255};
 const Color FLOWER_R{224, 96, 96, 255};
 const Color FLOWER_Y{240, 216, 96, 255};
 const Color DOOR_FRAME{120, 72, 40, 255};
-const Color FLOOR_A{200, 176, 144, 255};
-const Color FLOOR_B{184, 160, 128, 255};
 const Color WALL_COLOR{96, 80, 64, 255};
 const Color EXIT_COLOR{216, 192, 128, 255};
 
@@ -74,8 +76,9 @@ void drawTileLower(Image* img, Image* tileSheet, int gx, int gy) {
     }
 }
 
-// Hub room: plain checkered floor, solid walls, and a distinct exit tile.
-void drawHubTile(Image* img, int gx, int gy) {
+// Hub room: checkered floor (real sheet tiles), solid walls, and a distinct
+// exit tile (walls/exit are still procedural placeholders).
+void drawHubTile(Image* img, Image* tileSheet, int gx, int gy) {
     const int ox = gx * T, oy = gy * T;
     switch (hubmap::tileAt(gx, gy)) {
         case hubmap::WALL:
@@ -85,7 +88,10 @@ void drawHubTile(Image* img, int gx, int gy) {
             ImageDrawRectangle(img, ox, oy, T, T, EXIT_COLOR);
             break;
         case hubmap::FLOOR:
-            ImageDrawRectangle(img, ox, oy, T, T, (gx + gy) % 2 == 0 ? FLOOR_A : FLOOR_B);
+            if ((gx + gy) % 2 == 0)
+                blitSheetTile(img, tileSheet, HUB_FLOOR_A_SHEET_COL, HUB_FLOOR_A_SHEET_ROW, ox, oy);
+            else
+                blitSheetTile(img, tileSheet, HUB_FLOOR_B_SHEET_COL, HUB_FLOOR_B_SHEET_ROW, ox, oy);
             break;
     }
 }
@@ -164,14 +170,14 @@ int main() {
         for (int gx = 0; gx < demomap::W; ++gx) drawTileUpper(&upper, gx, gy);
     ExportImage(upper, "assets/maps/demo_upper.png");
     UnloadImage(upper);
-    UnloadImage(tileSheet);
 
-    // --- hub room: plain floor/walls, no upper-layer content ---
-    Image hubLower = GenImageColor(hubmap::W * T, hubmap::H * T, FLOOR_A);
+    // --- hub room: checkered floor (real tiles) + procedural walls/exit ---
+    Image hubLower = GenImageColor(hubmap::W * T, hubmap::H * T, WALL_COLOR);
     for (int gy = 0; gy < hubmap::H; ++gy)
-        for (int gx = 0; gx < hubmap::W; ++gx) drawHubTile(&hubLower, gx, gy);
+        for (int gx = 0; gx < hubmap::W; ++gx) drawHubTile(&hubLower, &tileSheet, gx, gy);
     ExportImage(hubLower, "assets/maps/hub_lower.png");
     UnloadImage(hubLower);
+    UnloadImage(tileSheet);
 
     Image hubUpper = GenImageColor(hubmap::W * T, hubmap::H * T, BLANK);
     ExportImage(hubUpper, "assets/maps/hub_upper.png");

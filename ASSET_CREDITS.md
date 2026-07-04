@@ -11,6 +11,7 @@ present so the engine has something to render and verify.
   GRASS, and PATH tiles are now real art, see below; tree canopy, trunk,
   flowers, and door frame overlay are still procedural)
 - `assets/maps/hub_lower.png`, `hub_upper.png` - generated portfolio hub room
+  (FLOOR is now real art, see below; WALL and EXIT are still procedural)
 - `assets/characters/hero.png` - generated 4-direction walk sheet
 - `assets/characters/npc.png` - generated 4-direction walk sheet, NPC palette
 - `assets/characters/shadow.png` - generated shadow
@@ -27,16 +28,21 @@ The goal is a Generation-4 Pokémon *look* using only legally-licensed assets.
   License: **CC0** (public domain).
   File: `assets/tiles/kenney_roguelike_sheet.png` (the pack's
   `Spritesheet/roguelikeSheet_transparent.png`, copied in unmodified).
-  Currently used for the demo map's WATER, GRASS, and PATH tiles (16x16 cells
-  stamped in by `tools/gen_assets.cpp`'s `blitSheetTile`): WATER at sheet
-  column 0 row 0, GRASS at column 5 row 0, PATH at column 6 row 0. Cell
-  identity was inferred without visually inspecting the sheet, by sampling
-  average RGB and per-channel standard deviation over each 16x16 cell: GRASS
-  is a near-solid green cell (avg ~140,195,52, std < 3) and PATH a near-solid
-  brown cell (avg ~178,130,84, std < 6), both distinct from the WATER blue and
-  from each other with high confidence. Trees, flowers, and the door frame
-  overlay are still procedural placeholders pending future iterations that
-  pick further cells from this same sheet.
+  Currently used for the demo map's WATER, GRASS, and PATH tiles, and the hub
+  room's FLOOR tile (16x16 cells stamped in by `tools/gen_assets.cpp`'s
+  `blitSheetTile`): WATER at sheet column 0 row 0, GRASS at column 5 row 0,
+  PATH at column 6 row 0, and the hub's two-tone floor checker at column 21
+  row 17 / column 26 row 18. Cell identity was inferred without visually
+  inspecting the sheet, by sampling average RGB and per-channel standard
+  deviation over each 16x16 cell: GRASS is a near-solid green cell (avg
+  ~140,195,52, std < 3), PATH a near-solid brown cell (avg ~178,130,84, std <
+  6), and the two hub floor tiles are near-solid light grays (avg ~219,219,219
+  std < 5 and ~203,203,203 std < 3) that read as a subtle stone-tile checker,
+  all distinct from each other with high confidence. Trees, flowers, the door
+  frame overlay, and the hub's WALL/EXIT tiles are still procedural
+  placeholders pending future iterations that pick further cells from this
+  same sheet (no confidently-identifiable dark neutral wall tile was found by
+  this color-statistics method in this sheet; may need a different pack).
 
 ### Candidates for future iterations
 
