@@ -34,6 +34,7 @@ add_executable(portfolio
   src/DirectionInput.cpp
   src/AssetStore.cpp
   src/ui/TextMessage.cpp
+  src/ui/KeyboardMenu.cpp
 )
 target_include_directories(portfolio PRIVATE src)
 target_link_libraries(portfolio PRIVATE raylib)

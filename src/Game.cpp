@@ -61,7 +61,19 @@ void Game::frame() {
     // --- update ---
     input_.update();
     npc_->update(input_, *map_);
-    if (message_.isActive()) {
+    if (menu_.isOpen()) {
+        // Pause menu is up: freeze the world and just navigate the list.
+        if (IsKeyPressed(KEY_DOWN)) menu_.moveDown();
+        if (IsKeyPressed(KEY_UP)) menu_.moveUp();
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            menu_.close();
+        } else if (IsKeyPressed(KEY_SPACE)) {
+            if (menu_.selectedIndex() == 1) { // "Quit"
+                quit_ = true;
+            }
+            menu_.close();
+        }
+    } else if (message_.isActive()) {
         // Dialogue is up: freeze player movement, drive the typewriter, and
         // let Space either fast-forward the reveal or close the box.
         message_.update();
@@ -72,6 +84,9 @@ void Game::frame() {
         player_->update(input_, *map_);
         if (IsKeyPressed(KEY_SPACE) && isAdjacent(*player_, *npc_)) {
             message_.show("Hi! Welcome to my portfolio.");
+        }
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            menu_.open({"Resume", "Quit"});
         }
     }
     const int camX = player_->x();
@@ -85,6 +100,7 @@ void Game::frame() {
     npc_->draw(camX, camY);
     map_->drawUpper(camX, camY);
     message_.draw();
+    menu_.draw();
     EndTextureMode();
 
     // --- blit scaled to the window (letterboxed, nearest-neighbor) ---
