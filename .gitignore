@@ -1,0 +1,19 @@
+# build output
+build/
+build-web/
+*.o
+*.obj
+
+# verification artifacts
+verify_shot.png
+*_shot.png
+
+# OMC / agent session state
+.omc/
+
+# macOS
+.DS_Store
+
+# editor
+.vscode/
+.idea/
