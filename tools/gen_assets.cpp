@@ -12,6 +12,18 @@
 namespace {
 constexpr int T = grid::TILE; // 16
 
+// Kenney "Roguelike/RPG Pack" (CC0, see ASSET_CREDITS.md). Sheet cells are
+// 16x16 with a 1px margin, so each cell occupies a 17x17 stride.
+constexpr int SHEET_CELL = T + 1;
+constexpr int WATER_SHEET_COL = 0;
+constexpr int WATER_SHEET_ROW = 0;
+
+void blitSheetTile(Image* dst, Image* sheet, int sheetCol, int sheetRow, int ox, int oy) {
+    Rectangle src{float(sheetCol * SHEET_CELL), float(sheetRow * SHEET_CELL), float(T), float(T)};
+    Rectangle dstRect{float(ox), float(oy), float(T), float(T)};
+    ImageDraw(dst, *sheet, src, dstRect, WHITE);
+}
+
 const Color GRASS_A{104, 168, 72, 255};
 const Color GRASS_B{120, 184, 88, 255};
 const Color PATH_A{216, 192, 128, 255};
@@ -36,7 +48,7 @@ void drawGrass(Image* img, int ox, int oy) {
             if (((x + y) / 2) % 3 == 0) ImageDrawPixel(img, ox + x, oy + y, GRASS_B);
 }
 
-void drawTileLower(Image* img, int gx, int gy) {
+void drawTileLower(Image* img, Image* tileSheet, int gx, int gy) {
     const int ox = gx * T, oy = gy * T;
     switch (demomap::tileAt(gx, gy)) {
         case demomap::GRASS:
@@ -53,9 +65,7 @@ void drawTileLower(Image* img, int gx, int gy) {
                 ImageDrawPixel(img, ox + (i * 5) % T, oy + i, PATH_B);
             break;
         case demomap::WATER:
-            ImageDrawRectangle(img, ox, oy, T, T, WATER_A);
-            for (int y = 2; y < T; y += 5)
-                ImageDrawRectangle(img, ox + 2, oy + y, 8, 1, WATER_B);
+            blitSheetTile(img, tileSheet, WATER_SHEET_COL, WATER_SHEET_ROW, ox, oy);
             break;
         case demomap::TREE:
             drawGrass(img, ox, oy);
@@ -143,10 +153,12 @@ int main() {
     std::filesystem::create_directories("assets/maps");
     std::filesystem::create_directories("assets/characters");
 
+    Image tileSheet = LoadImage("assets/tiles/kenney_roguelike_sheet.png");
+
     // --- map lower layer ---
     Image lower = GenImageColor(demomap::W * T, demomap::H * T, GRASS_A);
     for (int gy = 0; gy < demomap::H; ++gy)
-        for (int gx = 0; gx < demomap::W; ++gx) drawTileLower(&lower, gx, gy);
+        for (int gx = 0; gx < demomap::W; ++gx) drawTileLower(&lower, &tileSheet, gx, gy);
     ExportImage(lower, "assets/maps/demo_lower.png");
     UnloadImage(lower);
 
@@ -156,6 +168,7 @@ int main() {
         for (int gx = 0; gx < demomap::W; ++gx) drawTileUpper(&upper, gx, gy);
     ExportImage(upper, "assets/maps/demo_upper.png");
     UnloadImage(upper);
+    UnloadImage(tileSheet);
 
     // --- hub room: plain floor/walls, no upper-layer content ---
     Image hubLower = GenImageColor(hubmap::W * T, hubmap::H * T, FLOOR_A);

@@ -2,30 +2,44 @@
 
 ## Current assets (foundation)
 
-All art currently in `assets/` is **procedurally generated** by
+Most art in `assets/` is still **procedurally generated** by
 `tools/gen_assets.cpp` in this repo. It is original work, released under CC0
 (public domain). It is intentionally simple placeholder art in a Gen-4 palette,
 present so the engine has something to render and verify.
 
-- `assets/maps/demo_lower.png`, `demo_upper.png` - generated demo map
+- `assets/maps/demo_lower.png`, `demo_upper.png` - generated demo map (WATER
+  tile is now real art, see below; everything else still procedural)
 - `assets/maps/hub_lower.png`, `hub_upper.png` - generated portfolio hub room
 - `assets/characters/hero.png` - generated 4-direction walk sheet
 - `assets/characters/npc.png` - generated 4-direction walk sheet, NPC palette
 - `assets/characters/shadow.png` - generated shadow
 
-## Planned: curated free Gen-4-style assets (to swap in)
+## Curated free Gen-4-style assets (in progress)
 
 The goal is a Generation-4 Pokémon *look* using only legally-licensed assets.
-**No ripped Nintendo/Game Freak assets.** Candidate packs (verify each license
-before committing the files):
+**No ripped Nintendo/Game Freak assets.**
+
+### In use
+
+- **Roguelike/RPG Pack** by Kenney Vleugels for Kenney (www.kenney.nl), with
+  help by Lynn Evers. Source: https://kenney.nl/assets/roguelike-rpg-pack.
+  License: **CC0** (public domain).
+  File: `assets/tiles/kenney_roguelike_sheet.png` (the pack's
+  `Spritesheet/roguelikeSheet_transparent.png`, copied in unmodified).
+  Currently used for: the demo map's WATER tile (16x16 cell at sheet column 0,
+  row 0, stamped in by `tools/gen_assets.cpp`'s `blitSheetTile`). Remaining
+  tile types (grass, path, trees) and the character sheets are still
+  procedural placeholders pending future iterations that pick further cells
+  from this same sheet.
+
+### Candidates for future iterations
 
 | Pack | Source | License | Notes |
 | --- | --- | --- | --- |
-| Roguelike/RPG Pack | kenney.nl | **CC0** | Safest; top-down tiles + characters |
-| Tiny Town / Tiny Dungeon | kenney.nl | **CC0** | Clean 16px tiles |
+| Tiny Town / Tiny Dungeon | kenney.nl | **CC0** | Clean 16px tiles, no water/tree tiles found |
 | Tiny 16: Basic (Sharm) | opengameart.org | CC-BY 3.0 | Attribute the author |
 | Liberated Pixel Cup (LPC) | opengameart.org | CC-BY-SA 3.0 / GPL | Character generator; share-alike |
 | Pipoya Free RPG Character Sprites | itch.io | Free w/ credit | 4-direction top-down, Pokémon-like |
 
-When a pack is added: download it, drop files under `assets/`, record the exact
+When more of a pack is wired in: drop files under `assets/`, record the exact
 pack name, author, URL, and license here, and keep any required attribution.
