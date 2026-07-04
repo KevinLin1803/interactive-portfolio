@@ -17,6 +17,10 @@ constexpr int T = grid::TILE; // 16
 constexpr int SHEET_CELL = T + 1;
 constexpr int WATER_SHEET_COL = 0;
 constexpr int WATER_SHEET_ROW = 0;
+constexpr int GRASS_SHEET_COL = 5;
+constexpr int GRASS_SHEET_ROW = 0;
+constexpr int PATH_SHEET_COL = 6;
+constexpr int PATH_SHEET_ROW = 0;
 
 void blitSheetTile(Image* dst, Image* sheet, int sheetCol, int sheetRow, int ox, int oy) {
     Rectangle src{float(sheetCol * SHEET_CELL), float(sheetRow * SHEET_CELL), float(T), float(T)};
@@ -25,9 +29,6 @@ void blitSheetTile(Image* dst, Image* sheet, int sheetCol, int sheetRow, int ox,
 }
 
 const Color GRASS_A{104, 168, 72, 255};
-const Color GRASS_B{120, 184, 88, 255};
-const Color PATH_A{216, 192, 128, 255};
-const Color PATH_B{198, 172, 108, 255};
 const Color WATER_A{96, 144, 224, 255};
 const Color WATER_B{128, 176, 240, 255};
 const Color CANOPY{56, 128, 72, 255};
@@ -41,38 +42,33 @@ const Color FLOOR_B{184, 160, 128, 255};
 const Color WALL_COLOR{96, 80, 64, 255};
 const Color EXIT_COLOR{216, 192, 128, 255};
 
-void drawGrass(Image* img, int ox, int oy) {
-    ImageDrawRectangle(img, ox, oy, T, T, GRASS_A);
-    for (int y = 0; y < T; y += 2)
-        for (int x = 0; x < T; x += 2)
-            if (((x + y) / 2) % 3 == 0) ImageDrawPixel(img, ox + x, oy + y, GRASS_B);
+void drawGrass(Image* img, Image* tileSheet, int ox, int oy) {
+    blitSheetTile(img, tileSheet, GRASS_SHEET_COL, GRASS_SHEET_ROW, ox, oy);
 }
 
 void drawTileLower(Image* img, Image* tileSheet, int gx, int gy) {
     const int ox = gx * T, oy = gy * T;
     switch (demomap::tileAt(gx, gy)) {
         case demomap::GRASS:
-            drawGrass(img, ox, oy);
+            drawGrass(img, tileSheet, ox, oy);
             break;
         case demomap::FLOWER:
-            drawGrass(img, ox, oy);
+            drawGrass(img, tileSheet, ox, oy);
             ImageDrawRectangle(img, ox + 5, oy + 5, 2, 2, FLOWER_R);
             ImageDrawRectangle(img, ox + 9, oy + 8, 2, 2, FLOWER_Y);
             break;
         case demomap::PATH:
-            ImageDrawRectangle(img, ox, oy, T, T, PATH_A);
-            for (int i = 0; i < T; i += 3)
-                ImageDrawPixel(img, ox + (i * 5) % T, oy + i, PATH_B);
+            blitSheetTile(img, tileSheet, PATH_SHEET_COL, PATH_SHEET_ROW, ox, oy);
             break;
         case demomap::WATER:
             blitSheetTile(img, tileSheet, WATER_SHEET_COL, WATER_SHEET_ROW, ox, oy);
             break;
         case demomap::TREE:
-            drawGrass(img, ox, oy);
+            drawGrass(img, tileSheet, ox, oy);
             ImageDrawRectangle(img, ox + 6, oy + 9, 4, 6, TRUNK);
             break;
         case demomap::DOOR:
-            ImageDrawRectangle(img, ox, oy, T, T, PATH_A);
+            blitSheetTile(img, tileSheet, PATH_SHEET_COL, PATH_SHEET_ROW, ox, oy);
             ImageDrawRectangle(img, ox + 3, oy + 2, T - 6, T - 4, DOOR_FRAME);
             break;
     }

@@ -7,8 +7,9 @@ Most art in `assets/` is still **procedurally generated** by
 (public domain). It is intentionally simple placeholder art in a Gen-4 palette,
 present so the engine has something to render and verify.
 
-- `assets/maps/demo_lower.png`, `demo_upper.png` - generated demo map (WATER
-  tile is now real art, see below; everything else still procedural)
+- `assets/maps/demo_lower.png`, `demo_upper.png` - generated demo map (WATER,
+  GRASS, and PATH tiles are now real art, see below; tree canopy, trunk,
+  flowers, and door frame overlay are still procedural)
 - `assets/maps/hub_lower.png`, `hub_upper.png` - generated portfolio hub room
 - `assets/characters/hero.png` - generated 4-direction walk sheet
 - `assets/characters/npc.png` - generated 4-direction walk sheet, NPC palette
@@ -26,11 +27,16 @@ The goal is a Generation-4 Pokémon *look* using only legally-licensed assets.
   License: **CC0** (public domain).
   File: `assets/tiles/kenney_roguelike_sheet.png` (the pack's
   `Spritesheet/roguelikeSheet_transparent.png`, copied in unmodified).
-  Currently used for: the demo map's WATER tile (16x16 cell at sheet column 0,
-  row 0, stamped in by `tools/gen_assets.cpp`'s `blitSheetTile`). Remaining
-  tile types (grass, path, trees) and the character sheets are still
-  procedural placeholders pending future iterations that pick further cells
-  from this same sheet.
+  Currently used for the demo map's WATER, GRASS, and PATH tiles (16x16 cells
+  stamped in by `tools/gen_assets.cpp`'s `blitSheetTile`): WATER at sheet
+  column 0 row 0, GRASS at column 5 row 0, PATH at column 6 row 0. Cell
+  identity was inferred without visually inspecting the sheet, by sampling
+  average RGB and per-channel standard deviation over each 16x16 cell: GRASS
+  is a near-solid green cell (avg ~140,195,52, std < 3) and PATH a near-solid
+  brown cell (avg ~178,130,84, std < 6), both distinct from the WATER blue and
+  from each other with high confidence. Trees, flowers, and the door frame
+  overlay are still procedural placeholders pending future iterations that
+  pick further cells from this same sheet.
 
 ### Candidates for future iterations
 
