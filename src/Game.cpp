@@ -38,6 +38,11 @@ Game::Game(std::string screenshotPath, int screenshotFrames)
     const Texture2D shadow = assets_.load("assets/characters/shadow.png");
     player_ = std::make_unique<Person>(demomap::SPAWN_X, demomap::SPAWN_Y,
                                        Sprite(hero, shadow), /*isPlayer=*/true);
+
+    // NPC stands a few tiles east of spawn, on the walkable east-west path.
+    const Texture2D npcSheet = assets_.load("assets/characters/npc.png");
+    npc_ = std::make_unique<Person>(demomap::SPAWN_X + 3 * grid::TILE, demomap::SPAWN_Y,
+                                    Sprite(npcSheet, shadow), /*isPlayer=*/false);
 }
 
 Game::~Game() {
@@ -49,6 +54,7 @@ void Game::frame() {
     // --- update ---
     input_.update();
     player_->update(input_, *map_);
+    npc_->update(input_, *map_);
     const int camX = player_->x();
     const int camY = player_->y();
 
@@ -57,6 +63,7 @@ void Game::frame() {
     ClearBackground(Color{40, 50, 40, 255});
     map_->drawLower(camX, camY);
     player_->draw(camX, camY);
+    npc_->draw(camX, camY);
     map_->drawUpper(camX, camY);
     EndTextureMode();
 

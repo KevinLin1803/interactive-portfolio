@@ -25,6 +25,7 @@ private:
     AssetStore assets_;
     std::unique_ptr<GameMap> map_;
     std::unique_ptr<Person> player_;
+    std::unique_ptr<Person> npc_;
     DirectionInput input_;
 
     std::string screenshotPath_;

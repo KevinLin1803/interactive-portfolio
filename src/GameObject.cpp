@@ -10,8 +10,18 @@ void Person::update(DirectionInput& input, const GameMap& map) {
         updatePosition();
     } else if (isPlayer_ && input.hasDirection()) {
         startWalk(input.direction(), map);
+    } else if (!isPlayer_) {
+        updateIdleBehaviour();
     }
     updateSprite();
+}
+
+void Person::updateIdleBehaviour() {
+    idleTimer_ += 1;
+    if (idleTimer_ >= kIdleTurnInterval) {
+        idleTimer_ = 0;
+        direction_ = static_cast<grid::Dir>((static_cast<int>(direction_) + 1) % 4);
+    }
 }
 
 void Person::startWalk(grid::Dir dir, const GameMap& map) {

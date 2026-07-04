@@ -68,13 +68,25 @@ void drawTileUpper(Image* img, int gx, int gy) {
     ImageDrawCircle(img, ox + 8, oy + 6, 5, CANOPY);
 }
 
-// One 32x32 hero frame at cell (col,row). row = direction, col = walk frame.
-void drawHero(Image* img, int col, int row, grid::Dir dir) {
+struct PersonPalette {
+    Color skin;
+    Color cap;
+    Color shirt;
+    Color legs;
+};
+
+constexpr PersonPalette HERO_PALETTE{
+    {248, 208, 168, 255}, {216, 64, 64, 255}, {64, 112, 208, 255}, {56, 56, 72, 255}};
+constexpr PersonPalette NPC_PALETTE{
+    {248, 208, 168, 255}, {96, 176, 96, 255}, {224, 176, 80, 255}, {72, 56, 40, 255}};
+
+// One 32x32 person frame at cell (col,row). row = direction, col = walk frame.
+void drawPerson(Image* img, int col, int row, grid::Dir dir, const PersonPalette& pal) {
     const int ox = col * 32, oy = row * 32;
-    const Color skin{248, 208, 168, 255};
-    const Color cap{216, 64, 64, 255};
-    const Color shirt{64, 112, 208, 255};
-    const Color legs{56, 56, 72, 255};
+    const Color skin = pal.skin;
+    const Color cap = pal.cap;
+    const Color shirt = pal.shirt;
+    const Color legs = pal.legs;
     const int cx = ox + 16;
 
     // legs shift per walk frame to fake a stride
@@ -119,14 +131,20 @@ int main() {
     ExportImage(upper, "assets/maps/demo_upper.png");
     UnloadImage(upper);
 
-    // --- hero sheet: 4 cols (frames) x 4 rows (directions) of 32px ---
+    // --- character sheets: 4 cols (frames) x 4 rows (directions) of 32px ---
     const grid::Dir dirs[4] = {grid::Dir::Down, grid::Dir::Right, grid::Dir::Up,
                                grid::Dir::Left};
     Image hero = GenImageColor(128, 128, BLANK);
     for (int row = 0; row < 4; ++row)
-        for (int col = 0; col < 4; ++col) drawHero(&hero, col, row, dirs[row]);
+        for (int col = 0; col < 4; ++col) drawPerson(&hero, col, row, dirs[row], HERO_PALETTE);
     ExportImage(hero, "assets/characters/hero.png");
     UnloadImage(hero);
+
+    Image npc = GenImageColor(128, 128, BLANK);
+    for (int row = 0; row < 4; ++row)
+        for (int col = 0; col < 4; ++col) drawPerson(&npc, col, row, dirs[row], NPC_PALETTE);
+    ExportImage(npc, "assets/characters/npc.png");
+    UnloadImage(npc);
 
     // --- shadow ---
     Image shadow = GenImageColor(32, 32, BLANK);

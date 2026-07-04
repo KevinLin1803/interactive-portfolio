@@ -9,6 +9,7 @@ present so the engine has something to render and verify.
 
 - `assets/maps/demo_lower.png`, `demo_upper.png` - generated demo map
 - `assets/characters/hero.png` - generated 4-direction walk sheet
+- `assets/characters/npc.png` - generated 4-direction walk sheet, NPC palette
 - `assets/characters/shadow.png` - generated shadow
 
 ## Planned: curated free Gen-4-style assets (to swap in)
