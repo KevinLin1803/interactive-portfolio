@@ -30,7 +30,7 @@ void drawGrass(Image* img, int ox, int oy) {
             if (((x + y) / 2) % 3 == 0) ImageDrawPixel(img, ox + x, oy + y, GRASS_B);
 }
 
-void drawTile(Image* img, int gx, int gy) {
+void drawTileLower(Image* img, int gx, int gy) {
     const int ox = gx * T, oy = gy * T;
     switch (demomap::tileAt(gx, gy)) {
         case demomap::GRASS:
@@ -54,10 +54,18 @@ void drawTile(Image* img, int gx, int gy) {
         case demomap::TREE:
             drawGrass(img, ox, oy);
             ImageDrawRectangle(img, ox + 6, oy + 9, 4, 6, TRUNK);
-            ImageDrawCircle(img, ox + 8, oy + 6, 7, CANOPY_D);
-            ImageDrawCircle(img, ox + 8, oy + 6, 5, CANOPY);
             break;
     }
+}
+
+// Tree canopy lives on the upper layer, drawn after the player each frame, so
+// the player appears to walk behind the tree trunk while the leaves stay on
+// top. Every other tile has nothing on the upper layer.
+void drawTileUpper(Image* img, int gx, int gy) {
+    if (demomap::tileAt(gx, gy) != demomap::TREE) return;
+    const int ox = gx * T, oy = gy * T;
+    ImageDrawCircle(img, ox + 8, oy + 6, 7, CANOPY_D);
+    ImageDrawCircle(img, ox + 8, oy + 6, 5, CANOPY);
 }
 
 // One 32x32 hero frame at cell (col,row). row = direction, col = walk frame.
@@ -100,12 +108,14 @@ int main() {
     // --- map lower layer ---
     Image lower = GenImageColor(demomap::W * T, demomap::H * T, GRASS_A);
     for (int gy = 0; gy < demomap::H; ++gy)
-        for (int gx = 0; gx < demomap::W; ++gx) drawTile(&lower, gx, gy);
+        for (int gx = 0; gx < demomap::W; ++gx) drawTileLower(&lower, gx, gy);
     ExportImage(lower, "assets/maps/demo_lower.png");
     UnloadImage(lower);
 
-    // --- map upper layer (nothing on top yet: fully transparent) ---
+    // --- map upper layer: tree canopies only, drawn over the player ---
     Image upper = GenImageColor(demomap::W * T, demomap::H * T, BLANK);
+    for (int gy = 0; gy < demomap::H; ++gy)
+        for (int gx = 0; gx < demomap::W; ++gx) drawTileUpper(&upper, gx, gy);
     ExportImage(upper, "assets/maps/demo_upper.png");
     UnloadImage(upper);
 
