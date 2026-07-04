@@ -1,10 +1,7 @@
 #include "Game.hpp"
 #include "DemoMap.hpp"
 #include <cmath>
-
-#if !defined(PLATFORM_WEB)
-#include <cstdlib> // std::exit path helpers not needed, kept minimal
-#endif
+#include <cstdlib> // std::abs for the NPC-adjacency check
 
 Game::Game(std::string screenshotPath, int screenshotFrames)
     : screenshotPath_(std::move(screenshotPath)),
@@ -50,11 +47,33 @@ Game::~Game() {
     CloseWindow();
 }
 
+namespace {
+// True when the player is standing exactly one tile away from the NPC
+// (orthogonally adjacent), i.e. close enough to talk to it.
+bool isAdjacent(const Person& a, const Person& b) {
+    const int dx = std::abs(a.x() - b.x());
+    const int dy = std::abs(a.y() - b.y());
+    return (dx == grid::TILE && dy == 0) || (dx == 0 && dy == grid::TILE);
+}
+} // namespace
+
 void Game::frame() {
     // --- update ---
     input_.update();
-    player_->update(input_, *map_);
     npc_->update(input_, *map_);
+    if (message_.isActive()) {
+        // Dialogue is up: freeze player movement, drive the typewriter, and
+        // let Space either fast-forward the reveal or close the box.
+        message_.update();
+        if (IsKeyPressed(KEY_SPACE)) {
+            message_.confirm();
+        }
+    } else {
+        player_->update(input_, *map_);
+        if (IsKeyPressed(KEY_SPACE) && isAdjacent(*player_, *npc_)) {
+            message_.show("Hi! Welcome to my portfolio.");
+        }
+    }
     const int camX = player_->x();
     const int camY = player_->y();
 
@@ -65,6 +84,7 @@ void Game::frame() {
     player_->draw(camX, camY);
     npc_->draw(camX, camY);
     map_->drawUpper(camX, camY);
+    message_.draw();
     EndTextureMode();
 
     // --- blit scaled to the window (letterboxed, nearest-neighbor) ---

@@ -33,6 +33,7 @@ add_executable(portfolio
   src/GameMap.cpp
   src/DirectionInput.cpp
   src/AssetStore.cpp
+  src/ui/TextMessage.cpp
 )
 target_include_directories(portfolio PRIVATE src)
 target_link_libraries(portfolio PRIVATE raylib)

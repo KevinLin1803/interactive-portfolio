@@ -3,6 +3,7 @@
 #include "DirectionInput.hpp"
 #include "GameMap.hpp"
 #include "GameObject.hpp"
+#include "ui/TextMessage.hpp"
 #include "raylib.h"
 #include <memory>
 #include <string>
@@ -27,6 +28,7 @@ private:
     std::unique_ptr<Person> player_;
     std::unique_ptr<Person> npc_;
     DirectionInput input_;
+    TextMessage message_;
 
     std::string screenshotPath_;
     int screenshotFrames_;
